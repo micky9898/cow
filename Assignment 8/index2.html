@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student API</title>
+</head>
+<body>
+    
+    <!-- Section to ADD new students (POST) -->
+    <h2>Add Student</h2>
+    <input type="number" id="addId" placeholder="ID">
+    <input type="text" id="addName" placeholder="Name">
+    <input type="number" id="addAge" placeholder="Age">
+    <button onclick="addStudent()">Add Student</button>
+
+    <hr>
+
+    <!-- Section to GET and Display all students -->
+    <h2>Student List</h2>
+    <button onclick="loadStudents()">Load Students</button>
+    
+    
+    <div id="student-list"></div>
+
+    <hr>
+
+    <h3>Server Response:</h3>
+    <pre id="output"></pre>
+
+    <script>
+        const listOutput = document.getElementById('student-list');
+        const messageOutput = document.getElementById('output');
+
+        // GET: Load and display all students as an HTML list
+        async function loadStudents() {
+            const res = await fetch('/students');
+            const students = await res.json();
+            
+            listOutput.innerHTML = ''; // Clear the old list
+            
+            // Map each student to a div with editable inputs
+            students.map(student => {
+                const studentDiv = document.createElement('div');
+                
+                // This HTML is created for each student
+                // The name and age are inputs, making them "editable"
+                studentDiv.innerHTML = `
+                    <span>ID: ${student.id}</span>
+                    <input type="text" id="name-${student.id}" value="${student.name}">
+                    <input type="number" id="age-${student.id}" value="${student.age}">
+                    
+                    <!-- Buttons are right of the record -->
+                    <button onclick="updateStudent(${student.id})">Update</Gbutton>
+                    <button onclick="deleteStudent(${student.id})">Delete</button>
+                `;
+                listOutput.appendChild(studentDiv);
+            });
+        }
+
+        // POST: Add a new student
+        async function addStudent() {
+            const id = document.getElementById('addId').value;
+            const name = document.getElementById('addName').value;
+            const age = document.getElementById('addAge').value;
+
+            const res = await fetch('/students', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    id: parseInt(id), 
+                    name: name, 
+                    age: parseInt(age) 
+                })
+            });
+            const data = await res.json();
+            
+            messageOutput.textContent = JSON.stringify(data.message, null, 2);
+            loadStudents(); // Refresh the list
+        }
+
+        // DELETE: Delete a student by ID
+        async function deleteStudent(id) {
+            const res = await fetch(/students/${id}, {
+                method: 'DELETE'
+            });
+            const data = await res.json();
+            
+            messageOutput.textContent = JSON.stringify(data.message, null, 2);
+            loadStudents(); // Refresh the list
+        }
+
+        // PUT: Update a student by ID
+        async function updateStudent(id) {
+            // Read values directly from the input fields in the list
+            const name = document.getElementById(name-${id}).value;
+            const age = document.getElementById(age-${id}).value;
+
+            const updates = {};
+            if (name) updates.name = name;
+            if (age) updates.age = parseInt(age);
+
+            const res = await fetch(/students/${id}, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updates)
+            });
+            const data = await res.json();
+
+            messageOutput.textContent = JSON.stringify(data.message, null, 2);
+            // We reload the list to ensure data is fresh from the server
+            loadStudents(); 
+        }
+
+        // Load students on page start
+        loadStudents();
+        
+    </script>
+</body>
+</html>
