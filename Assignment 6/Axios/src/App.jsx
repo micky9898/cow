@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios from "axios"; //communicate with servers — to send data and get data from an API easily.
 
 
 function App() {
